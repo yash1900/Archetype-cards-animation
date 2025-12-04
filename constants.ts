@@ -19,26 +19,26 @@ export const CARDS_DATA: CardData[] = [
     title: "",
     subtitle: "",
     tag: "",
-    imageUrl: "https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1000&auto=format&fit=crop", 
+    imageUrl: "/assets/rabbit.png",
     stats: [],
-    bgGradient: "linear-gradient(to bottom, #0f172a, #1e3a8a)" // Deep Blue (Urban)
+    bgGradient: "url('/assets/blue_bg.png')" // Deep Blue (Urban)
   },
   {
     id: 2,
     title: "",
     subtitle: "",
     tag: "",
-    imageUrl: "https://images.unsplash.com/photo-1449824913929-2b6a6af686c4?q=80&w=1000&auto=format&fit=crop", 
+    imageUrl: "/assets/owl.png",
     stats: [],
-    bgGradient: "linear-gradient(to bottom, #2e1065, #7c3aed)" // Violet/Purple (Creative)
+    bgGradient: "url('/assets/blue_bg_2.png')" // Violet/Purple (Creative)
   },
   {
     id: 3,
     title: "",
     subtitle: "",
     tag: "",
-    imageUrl: "https://images.unsplash.com/photo-1515405295579-ba7f9f1b8cd8?q=80&w=1000&auto=format&fit=crop", 
+    imageUrl: "/assets/deer.jpg",
     stats: [],
-    bgGradient: "linear-gradient(to bottom, #042f2e, #0d9488)" // Teal/Cyan (Silent)
+    bgGradient: "url('/assets/blue_bg_3.png')" // Teal/Cyan (Silent)
   }
 ];

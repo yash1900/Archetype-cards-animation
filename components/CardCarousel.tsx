@@ -32,14 +32,14 @@ interface CardCarouselProps {
 const CardCarousel: React.FC<CardCarouselProps> = ({ cards, cardDim, viewportDim }) => {
   const [currentVirtualIndex, setCurrentVirtualIndex] = useState(0);
   const haptics = useHaptics();
-  
+
   // dragX represents the GLOBAL scroll position of the track.
   // -SPACING * i = Index i is centered.
   const dragX = useMotionValue(0);
 
   // --- PHYSICS CONSTANTS ---
   const INACTIVE_SCALE = 0.85;
-  
+
   // Center-to-Center spacing between cards
   const SPACING = (cardDim.width / 2) + cardDim.gap + ((cardDim.width * INACTIVE_SCALE) / 2);
 
@@ -62,7 +62,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, cardDim, viewportDim
     const unsubscribe = dragX.on("change", (latest) => {
       const rawIndex = -latest / SPACING;
       const rounded = Math.round(rawIndex);
-      
+
       // Update state if we've moved to a new integer slot
       // This triggers re-render of the window of visible cards
       if (rounded !== currentVirtualIndex) {
@@ -75,9 +75,9 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, cardDim, viewportDim
 
   const handleCardTap = (virtualIndex: number) => {
     if (virtualIndex === currentVirtualIndex) return;
-    
+
     haptics.medium();
-    
+
     // Animate to the specific virtual position
     animate(dragX, -virtualIndex * SPACING, {
       type: "spring",
@@ -95,27 +95,27 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, cardDim, viewportDim
   const onDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset, velocity } = info;
     const currentPos = dragX.get();
-    
+
     const predictedPos = currentPos + (velocity.x * 0.2);
     const rawIndex = -predictedPos / SPACING;
     let targetIndex = Math.round(rawIndex);
-    
+
     const swipeThreshold = 30;
     const currentIndex = Math.round(-currentPos / SPACING);
-    
+
     // Directional swipe logic
     if (offset.x < -swipeThreshold && targetIndex === currentIndex) {
-        targetIndex = currentIndex + 1;
+      targetIndex = currentIndex + 1;
     }
     else if (offset.x > swipeThreshold && targetIndex === currentIndex) {
-        targetIndex = currentIndex - 1;
+      targetIndex = currentIndex - 1;
     }
 
     // No clamping constraints for infinite loop
-    
-    animate(dragX, -targetIndex * SPACING, { 
-      type: "spring", 
-      stiffness: 220, 
+
+    animate(dragX, -targetIndex * SPACING, {
+      type: "spring",
+      stiffness: 220,
       damping: 28,
       mass: 0.7,
       restDelta: 0.001
@@ -124,42 +124,42 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, cardDim, viewportDim
 
   // --- WINDOW RENDERING LOGIC ---
   // Render current index +/- buffer to ensure visible area is populated
-  const buffer = 2; 
+  const buffer = 2;
   const visibleIndices: number[] = [];
   for (let i = currentVirtualIndex - buffer; i <= currentVirtualIndex + buffer; i++) {
     visibleIndices.push(i);
   }
 
   return (
-    <div 
+    <div
       className="relative w-full h-full flex items-center justify-center overflow-hidden"
       style={{ perspective: '1000px' }}
     >
       {/* INFINITE DYNAMIC WIPE BACKGROUND */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 z-0 pointer-events-none"
-        style={{ 
+        style={{
           x: backgroundX,
           // The container doesn't really need a width, we just position children absolutely relative to it
         }}
       >
         {visibleIndices.map(virtualIndex => {
-            const wrappedIndex = getWrappedIndex(virtualIndex);
-            const cardData = cards[wrappedIndex];
-            return (
-                <div 
-                    key={`bg-${virtualIndex}`}
-                    className="absolute top-0 h-full"
-                    style={{ 
-                        width: viewportDim.width, 
-                        background: cardData.bgGradient,
-                        // Corrected Formula:
-                        // Container moves by +VirtualIndex * ViewportWidth (inverted ratio)
-                        // So Panel must be at -VirtualIndex * ViewportWidth to be seen at 0
-                        left: -virtualIndex * viewportDim.width
-                    }}
-                />
-            );
+          const wrappedIndex = getWrappedIndex(virtualIndex);
+          const cardData = cards[wrappedIndex];
+          return (
+            <div
+              key={`bg-${virtualIndex}`}
+              className="absolute top-0 h-full"
+              style={{
+                width: viewportDim.width,
+                background: cardData.bgGradient,
+                // Corrected Formula:
+                // Container moves by +VirtualIndex * ViewportWidth (inverted ratio)
+                // So Panel must be at -VirtualIndex * ViewportWidth to be seen at 0
+                left: -virtualIndex * viewportDim.width
+              }}
+            />
+          );
         })}
       </motion.div>
 
@@ -178,9 +178,9 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, cardDim, viewportDim
         {visibleIndices.map((virtualIndex) => {
           const wrappedIndex = getWrappedIndex(virtualIndex);
           const cardData = cards[wrappedIndex];
-          
+
           return (
-            <CardItem 
+            <CardItem
               key={`card-${virtualIndex}`} // Unique key using virtualIndex for "loop count" awareness
               virtualIndex={virtualIndex}
               currentVirtualIndex={currentVirtualIndex}
@@ -209,35 +209,35 @@ interface CardItemProps {
   inactiveScale: number;
 }
 
-const CardItem: React.FC<CardItemProps> = ({ 
-  virtualIndex, 
+const CardItem: React.FC<CardItemProps> = ({
+  virtualIndex,
   currentVirtualIndex,
-  dragX, 
-  card, 
-  cardDim, 
+  dragX,
+  card,
+  cardDim,
   spacing,
   onTap,
   inactiveScale
 }) => {
   // Determine absolute position based on virtual index
   const absoluteX = virtualIndex * spacing;
-  
+
   // Transform logic now needs to handle the infinite strip
   // We use `dragX` (global) + `absoluteX` (local) to determine where this card is relative to viewport center
-  const x = useTransform(dragX, (value) => value + absoluteX);
-  
-  const scale = useTransform(x, 
-    [-spacing * 2, -spacing, 0, spacing, spacing * 2], 
+  const x = useTransform(dragX, (value: number) => value + absoluteX);
+
+  const scale = useTransform(x,
+    [-spacing * 2, -spacing, 0, spacing, spacing * 2],
     [inactiveScale * 0.9, inactiveScale, 1, inactiveScale, inactiveScale * 0.9]
   );
-  
-  const opacity = useTransform(x, 
-    [-spacing * 2, -spacing, 0, spacing, spacing * 2], 
+
+  const opacity = useTransform(x,
+    [-spacing * 2, -spacing, 0, spacing, spacing * 2],
     [0, 0.7, 1, 0.7, 0]
   );
 
-  const zIndexRaw = useTransform(x, 
-    [-spacing * 1.5, 0, spacing * 1.5], 
+  const zIndexRaw = useTransform(x,
+    [-spacing * 1.5, 0, spacing * 1.5],
     [0, 100, 0]
   );
   const zIndex = useTransform(zIndexRaw, (v) => Math.round(v));
@@ -250,7 +250,7 @@ const CardItem: React.FC<CardItemProps> = ({
         position: 'absolute',
         width: cardDim.width,
         height: cardDim.height,
-        left: absoluteX, 
+        left: absoluteX,
         scale,
         opacity,
         zIndex,
